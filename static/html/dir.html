@@ -1,5 +1,7 @@
 <div>
-    <h3>Directory {{dir}}</h3>
+    <h3>Directory
+        <a ng-href="#!/dir/">/</a><a ng-repeat="parent in parents" ng-href="/#!/dir/{{parent.href}}">{{parent.name}}/</a>
+    </h3>
     <div class="grounder-dir-children">
         <h4>Subdirectories</h4>
         <ul>
