@@ -9,11 +9,14 @@ app.config(function($routeProvider) {
       controller: "imgCtrl"
   })
   .when("/img", { redirectTo: "/img/" })
-  .when("/dir:dir*", {
+  .when("/dir/:dir*/", {
       templateUrl: "/html/dir.html",
       controller: "dirCtrl"
   })
-  .when("/dir", {redirectTo: "/dir/" })
+  .when("/dir/", {
+      templateUrl: "/html/dir.html",
+      controller: "dirCtrl"
+  })
   .when("/template:template*", {
       templateUrl: "/html/template.html",
       controller: "templateCtrl"
@@ -26,6 +29,17 @@ app.config(function($routeProvider) {
 
 app.controller("imgCtrl", function($scope, $routeParams, $http) {
     $scope.img = $routeParams.img;
+    function split_dir_img(str)
+    {
+        var split = str.split('/')
+        var ret = '/'
+        for(var i = 1; i < split.length - 1; i++)
+        {
+            ret += split[i] + '/'
+        }
+        return ret
+    }
+    $scope.dir = split_dir_img($scope.img)
     $scope.img_url = "/api/img" + $scope.img
     $scope.old_label = {}
     $scope.label = {}
@@ -55,8 +69,30 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
 });
 
 app.controller("dirCtrl", function($scope, $routeParams, $http) {
+    $scope.dir = $routeParams.dir == undefined ? '/' : $routeParams.dir
+    if ($scope.dir[0] != '/') $scope.dir = '/' + $scope.dir
+    if ($scope.dir.length > 1 && $scope.dir[-1] != '/') $scope.dir += '/'
+
+    // Just defaults for testing until API works
+    $scope.children = ['test', 'test2']
+    $scope.images = ['1', '2']
+
+    $http.get("/api/dir" + $scope.img).then(
+    function success(res) {
+        if (res.object != "object") {
+            console.warn('dir response is not json')
+        }
+        $scope.children = res.data['children'] === undefined ? [] : res.data['children']
+        $scope.images = res.data['images'] == undefined ? [] : res.data['images']
+    },
+    function error(res) {
+        console.warn('could not get directory', res.status, res.data)
+    })
+
+    $scope.reset = function () {
+        $scope.label = $scope.old_label
+    }
     console.log("dir");
-    console.log($routeParams.dir);
 });
 
 app.controller("templateCtrl", function($scope, $routeParams, $http) {
