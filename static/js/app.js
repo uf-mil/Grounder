@@ -73,6 +73,18 @@ app.controller("dirCtrl", function($scope, $routeParams, $http) {
     if ($scope.dir[0] != '/') $scope.dir = '/' + $scope.dir
     if ($scope.dir.length > 1 && $scope.dir[-1] != '/') $scope.dir += '/'
 
+    split = $scope.dir.split('/')
+    if (split.length == 2) split = []
+    else split = split.slice(1, -1)
+    $scope.parents = []
+    if (split.length > 0)
+        $scope.parents.push({'name': split[0], 'href': split[0]})
+    for (var i = 1; i < split.length; i++)
+    {
+        console.log($scope.parents)
+        $scope.parents.push({'name': split[i], 'href': $scope.parents[i - 1]['href'] + '/' + split[i]})
+    }
+
     // Just defaults for testing until API works
     $scope.children = ['test', 'test2']
     $scope.images = ['1', '2']
