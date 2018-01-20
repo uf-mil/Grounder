@@ -6,7 +6,7 @@ from werkzeug.utils import secure_filename
 
 
 UPLOAD_FOLDER = '/data'
-ALLOWED_EXTENSIONS = set(['pdf', 'png', 'jpg', 'jpeg', 'gif'])
+ALLOWED_EXTENSIONS = set(['png'])
 
 app = Flask(__name__, static_url_path='/static')
 port = 5000
@@ -72,14 +72,14 @@ def api_data(my_path=None):
 		return my_path if my_path is not None else 'No path'
 @app.route('/api/dir')
 @app.route('/api/dir/<path:my_path>', methods=['GET', 'POST'])
-def api_dir():
+def api_dir(my_path):
 	if request.method == 'POST':
 		return 'General Kenobi!'
 		# do_edit_dir()
 	else:
 		if os.path.isdir(my_path):
 			child_dirs = glob('{}/*/'.format(my_path))
-			child_imgs = glob('{}/*.png')
+			child_imgs = glob('{}/*.png'.format(my_path))
 			return jsonify(child_dirs), jsonify(child_imgs)
 		else:
 			return 'GENERAL KENOBI!'
