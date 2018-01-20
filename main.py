@@ -6,7 +6,8 @@ from werkzeug.utils import secure_filename
 
 
 UPLOAD_FOLDER = '/data'
-ALLOWED_EXTENSIONS = set(['png'])
+
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
 app = Flask(__name__, static_url_path='/static')
 port = 5000
@@ -36,8 +37,9 @@ def test(test_in):
 
 @app.route('/api/img/<path:my_path>', methods=['GET', 'POST'])
 def img_open(my_path=None):
-	if request.method == 'GET':
-		return app.send_static_file(my_path)
+	if (request.method == 'GET'):
+		print ("{}{}".format(my_path, '.png'))
+		return app.send_static_file("{}{}{}".format('img/',my_path, '.png'))
 
 @app.route('/view')
 @app.route('/view/<path:my_path>', methods=['GET', 'POST'])
