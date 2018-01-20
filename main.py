@@ -36,7 +36,7 @@ def test(test_in):
 @app.route('/api/img/<path:my_path>', methods=['GET', 'POST'])
 def img_open(my_path=None):
 	if request.method == 'GET':
-		return app.send_static_file('img/1.jpg')
+		return app.send_static_file(my_path)
 
 @app.route('/view')
 @app.route('/view/<path:my_path>', methods=['GET', 'POST'])
