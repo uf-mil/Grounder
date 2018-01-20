@@ -33,6 +33,11 @@ def statics(file):
 def test(test_in):
 	return render_template("test.html", test_in = test_in)
 
+@app.route('/api/img/<path:my_path>', methods=['GET', 'POST'])
+def img_open(my_path=None):
+	if request.method == 'GET':
+		return app.send_static_file('img/1.jpg')
+
 @app.route('/view')
 @app.route('/view/<path:my_path>', methods=['GET', 'POST'])
 def api_data(my_path=None):
