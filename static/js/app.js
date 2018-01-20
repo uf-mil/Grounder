@@ -89,7 +89,7 @@ app.controller("dirCtrl", function($scope, $routeParams, $http) {
     $scope.children = ['test', 'test2']
     $scope.images = ['1', '2']
 
-    $http.get("/api/dir" + $scope.img).then(
+    $http.get("/api/dir" + $scope.dir).then(
     function success(res) {
         if (res.object != "object") {
             console.warn('dir response is not json')
@@ -108,6 +108,5 @@ app.controller("dirCtrl", function($scope, $routeParams, $http) {
 });
 
 app.controller("templateCtrl", function($scope, $routeParams, $http) {
-    console.log("template");
-    console.log($routeParams.template);
+    $scope.classes = ['Buoy', 'STC', 'Dock']
 });
