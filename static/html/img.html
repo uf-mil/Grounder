@@ -1,7 +1,12 @@
 <div>
     <h3>Image {{img}}</h3>
     <a ng-href="/#!/dir{{dir}}">Directory</a>
-    <img ng-src="{{img_url}}" >
+    <div>
+        <canvas id="canvas" width="800" height="800" style="border:1px solid #000000;">
+            Your browser does not support the HTML5 canvas tag.
+        </canvas>
+        <input type="text" id="label_txt" />
+    </div>
     <div>
         {{label}}
     </div>
