@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
-from flask import Flask, request, render_template, redirect, url_for, send_from_directory
+from glob import glob
+from flask import Flask, request, render_template, redirect, url_for, send_from_directory, jsonify
 from werkzeug.utils import secure_filename
 
 
@@ -11,7 +12,7 @@ app = Flask(__name__, static_url_path='/static')
 port = 5000
 host = '0.0.0.0'
 if 'port' in os.environ:
-	port = os.environ['port']
+	port = int(os.environ['port'])
 if 'host' in os.environ:
 	host = os.environ['host']
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -69,15 +70,19 @@ def api_data(my_path=None):
 
 	else:
 		return my_path if my_path is not None else 'No path'
-@app.route('/dir')
-@app.route('/dir/<path:my_path>', methods=['GET', 'POST'])
+@app.route('/api/dir')
+@app.route('/api/dir/<path:my_path>', methods=['GET', 'POST'])
 def api_dir():
 	if request.method == 'POST':
 		return 'General Kenobi!'
 		# do_edit_dir()
 	else:
-		return 'Hello there!'
-		# show_dir()
+		if os.path.isdir(my_path):
+			child_dirs = glob('{}/*/'.format(my_path))
+			child_imgs = glob('{}/*.png')
+			return jsonify(child_dirs), jsonify(child_imgs)
+		else:
+			return 'GENERAL KENOBI!'
 @app.route('/json')
 @app.route('/json/<path:my_path>', methods=['GET', 'POST'])
 def api_json():
