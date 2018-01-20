@@ -1,0 +1,19 @@
+{
+ "name": "grounder",
+  "version": "0.0.1",
+  "description": "The best machine learned API of all time.",
+  "author": "the MIL <mil@mil.com>",
+  "main": "index.js",
+
+  "dependencies": {
+  },
+
+"devDependencies": {
+    "chai": "*",
+    "mocha": "*"
+  },
+
+  "scripts": {
+    "zip": "zip -r ../grounder.zip *"
+  }
+}
