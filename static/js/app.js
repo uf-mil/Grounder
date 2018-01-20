@@ -220,8 +220,8 @@ app.controller("dirCtrl", function($scope, $routeParams, $http) {
     }
 
     // Just defaults for testing until API works
-    $scope.children = ['test', 'test2']
-    $scope.images = ['1', '2']
+    $scope.children = []
+    $scope.images = []
 
     $http.get("/api/dir" + $scope.dir).then(
     function success(res) {
@@ -242,5 +242,32 @@ app.controller("dirCtrl", function($scope, $routeParams, $http) {
 });
 
 app.controller("templateCtrl", function($scope, $routeParams, $http) {
-    $scope.classes = ['Buoy', 'STC', 'Dock']
+    $scope.template = {'classes': ['Buoy', 'STC', 'Dock'] }
+    $scope.template_path = $routeParams.template
+
+    $http.get('/api/template' + $scope.template_path).then(
+    function success(res) {
+        $scope.template = res.data
+        if ($scope.template['classes'] == undefined) $scope.template['classes'] = []
+
+    },
+    function error(res) {
+        console.warn('could not get template', res.status, res.data)
+    })
+
+    $scope.remove = function(index) {
+        $scope.template['classes'].splice(index, 1);
+    }
+    $scope.add = function() {
+        $scope.template['classes'].push('');
+    }
+    $scope.save = function() {
+        $http.post("/api/template" + $scope.template_path, $scope.template).then(
+        function success(res) {
+            console.log('save good')
+        },
+        function error(res) {
+            console.warn('could not save template', res.status, res.data)
+        })
+    }
 });
