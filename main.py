@@ -37,9 +37,9 @@ def test(test_in):
 
 @app.route('/api/img/<path:my_path>', methods=['GET', 'POST'])
 def img_open(my_path=None):
-	if (request.method == 'GET'):
-		print ("{}{}".format(my_path, '.png'))
-		return app.send_static_file("{}{}{}".format('img/',my_path, '.png'))
+	if request.method == 'GET':
+		print(os.path.join('data/', my_path, '.png'))
+		return app.send_static_file(os.path.join('data/', (my_path + '.png')))
 
 @app.route('/view')
 @app.route('/view/<path:my_path>', methods=['GET', 'POST'])
@@ -72,17 +72,20 @@ def api_data(my_path=None):
 
 	else:
 		return my_path if my_path is not None else 'No path'
-@app.route('/api/dir')
+@app.route('/api/dir/')
 @app.route('/api/dir/<path:my_path>', methods=['GET', 'POST'])
-def api_dir(my_path):
+def api_dir(my_path=''):
 	if request.method == 'POST':
 		return 'General Kenobi!'
 		# do_edit_dir()
 	else:
+		my_path = os.path.join('static/data/', my_path)
 		if os.path.isdir(my_path):
-			child_dirs = glob('{}/*/'.format(my_path))
-			child_imgs = glob('{}/*.png'.format(my_path))
-			return jsonify(child_dirs), jsonify(child_imgs)
+			child_dirs = [name for name in os.listdir(my_path) if os.path.isdir(os.path.join(my_path, name))]
+			child_imgs = [os.path.splitext(name)[0] for name in os.listdir(my_path) if os.path.isfile(os.path.join(my_path, name))]
+			print(my_path)
+			dicti = {'children': child_dirs, 'images': child_imgs}
+			return jsonify(dicti)
 		else:
 			return 'GENERAL KENOBI!'
 @app.route('/json')
