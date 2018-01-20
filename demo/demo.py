@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, redirect
 import os
 import sys
+import time
 
 app = Flask(__name__)
 
@@ -8,6 +9,7 @@ app = Flask(__name__)
 def button():
     if request.method == "POST":
         os.system("sudo docker run -itd -p 5000:5000 grounder ./root/start.sh 0.0.0.0 5000")
+        time.sleep(1)
         return redirect("http://ec2-34-238-117-47.compute-1.amazonaws.com:5000")
     return render_template("button.html")
 
