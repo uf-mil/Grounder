@@ -40,7 +40,7 @@ def api_label(my_path=None):
         if not os.path.isfile(file):
             return Response(status=404, mimetype='application/json')
         with open(file, 'r') as f:
-            return json.dumps({json.load(f)}), 200, {'ContentType': 'application/json'}
+            return json.dumps(json.load(f)), 200, {'ContentType': 'application/json'}
 
 @app.route('/api/upload/', methods=['POST'])
 @app.route('/api/upload/<path:my_path>', methods=['POST'])

@@ -2,20 +2,45 @@
     <h3>Image {{img}}
         <a ng-href="/#!/dir{{dir}}" type="button" class="btn btn-info">View Directory</a>
     </h3>
-    <div>
-        <canvas id="canvas" width="800" height="800" style="border:1px solid #000000;">
+    <div id="stage">
+        <canvas id="canvas">
             Your browser does not support the HTML5 canvas tag.
         </canvas>
-        <input type="text" id="label_txt" />
+        <canvas id="canvas_back"></canvas>
     </div>
-    <div>
-        {{label}}
+    <div id="tools">
+        <input type="text" value="none" id="label_txt" class="form-control" style="margin: 1em 0;" />
+        <div class="form-group">
+            <select class="custom-select" id="templates" ng-model='x' ng-options="class for class in template['classes']">
+            </select>
+        </div>
+        <button class="btn btn-success" ng-click="save()">Save</button>
+        <button class="btn btn-danger" ng-click="reset()">Reset</button>
     </div>
-<div class="form-group">
-<select ng-model='x'
-        ng-options="class for class in template['classes']">
-</select>
 </div>
-    <button ng-click="save()">Save</button>
-    <button ng-click="reset()">Reset</button>
-</div>
+<style>
+#tools {
+    position: fixed;
+    left: 5%;
+    top: 50%;
+    padding: 1em;
+    border: 1px solid #ced4da;
+}
+
+#stage {
+    position: relative;
+}
+
+canvas {
+    position: absolute;
+    border: 1px solid #ced4da;
+}
+
+#canvas {
+    z-index: 2
+}
+
+#canvas_back {
+    z-index: 1
+}
+</style>
