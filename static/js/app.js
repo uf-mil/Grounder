@@ -51,8 +51,14 @@ app.controller("imgCtrl", function($scope, $routeParams, $http, $location) {
     $scope.next = function() {
         $http.get("/api/next" + $scope.dir).then(
         function success(res) {
-            console.log(res.data, $scope.img)
-            $location.url('#!/img/' + $scope.dir + res.data)
+            change = '/img' + $scope.dir + res.data
+            console.log(res.data, change, $location.url())
+            if (change == $location.url())
+            {
+                console.warn('next image is current image')
+                return
+            }
+            $location.url(change)
         },
         function error(res) {
             console.warn('could not get image', res.status, res.data)
@@ -91,7 +97,7 @@ app.controller("imgCtrl", function($scope, $routeParams, $http, $location) {
 
     $scope.x = ''
     $scope.template = {'classes': ['Buoy', 'STC', 'Dock'] } // Test default
-    $http.get('/api/template' + $scope.img).then(
+    $http.get('/api/template' + $scope.dir).then(
     function success(res) {
         $scope.template = res.data
         if ($scope.template['classes'] == undefined) $scope.template['classes'] = []
