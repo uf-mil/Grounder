@@ -1,7 +1,10 @@
 <div>
-    <h3>Template for directory {{template_path}}</h3>
+    <h3>Template for directory
+        <a ng-href="#!/template/">/</a><span ng-repeat="parent in parents"><a  ng-href="/#!/template/{{parent.href}}">{{parent.name}}</a>/</span>
+        <a ng-href="#!/dir{{dir}}" type="button" class="btn btn-info float-right">View Directory</a>
+    </h3>
     <form>
-      <div ng-repeat="class in template.classes track by $index" class="input-group mb-3">
+      <div ng-repeat="class in template['classes'] track by $index" class="input-group mb-3">
         <input type="text" class="form-control" placeholder="Label class" ng-value="class">
         <div class="input-group-append">
           <button class="btn btn-warning" type="button" ng-click="remove($index)">Remove</button>
