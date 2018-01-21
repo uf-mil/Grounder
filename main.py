@@ -5,9 +5,6 @@ from flask import Flask, Response, request, render_template, redirect, url_for, 
 from werkzeug.utils import secure_filename
 import json
 
-
-UPLOAD_FOLDER = '/data'
-
 app = Flask(__name__, static_url_path='/static')
 port = 5000
 host = '0.0.0.0'
@@ -47,13 +44,13 @@ def api_label(my_path=None):
 
 @app.route('/api/upload/', methods=['POST'])
 @app.route('/api/upload/<path:my_path>', methods=['POST'])
-def api_data(my_path=''):
+def api_upload(my_path=''):
     path = os.path.join('static/data', my_path)
     if not os.path.isdir(path):
         return Response(status=400, response='directory does not exsist')
     if len(request.files) != 1:
         return Response(status=400, response='1 file must be uploaded')
-    f = request.files[request.files.keys()[0]]
+    f = request.files.get(list(request.files.keys())[0])
     filename = f.filename
     filename = os.path.split(filename)[-1]
     ext = os.path.splitext(filename)[1]
@@ -61,7 +58,7 @@ def api_data(my_path=''):
         return Response(status=400, response='file must be .png')
     # Save image
     resolved = os.path.join('static/data', my_path, filename)
-    with open(resolved, 'w') as writefile:
+    with open(resolved, 'wb') as writefile:
         f.save(writefile)
     return Response(status=200)
 
