@@ -82,6 +82,7 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
         console.warn('could not get label', res.status, res.data)
     })
 
+    $scope.x = ''
     $scope.template = {'classes': ['Buoy', 'STC', 'Dock'] } // Test default
     $http.get('/api/template' + $scope.dir).then(
     function success(res) {
