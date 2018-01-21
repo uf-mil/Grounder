@@ -82,19 +82,6 @@ app.controller("imgCtrl", function($scope, $routeParams, $http, $location) {
     $scope.label = new Array();
     $scope.label.push(new Shape());
 
-    $http.get("/api/label" + $scope.img).then(
-    function success(res) {
-        $scope.old_label = res.data
-        $scope.label = $scope.old_label
-        for (var i = 0; i < $scope.label.length; i++) {
-          redraw(true, i);
-        }
-        newshape();
-    },
-    function error(res) {
-        console.warn('could not get label', res.status, res.data)
-    })
-
     $scope.x = ''
     $scope.template = {'classes': [] } // Test default
     $http.get('/api/template' + $scope.dir).then(
@@ -147,13 +134,33 @@ app.controller("imgCtrl", function($scope, $routeParams, $http, $location) {
         context_back = canvas_back.getContext("2d");
 
         var img1 = new Image();
-        img1.onloadend = function() {
+        img1.onload = function() {
           canvas_back.height = img1.height;
           canvas_back.width = img1.width;
           canvas.height = img1.height;
           canvas.width = img1.width;
+          console.log("Width: ", img1.width)
+          context.strokeRect(0, 0, canvas.width, canvas.height);
+          context_back.strokeRect(0, 0, canvas.width, canvas.height);
           context_back.drawImage(this, 0, 0);
-          clearanddraw();
+
+          $http.get("/api/label" + $scope.img).then(
+          function success(res) {
+              $scope.old_label = res.data
+              $scope.label = $scope.old_label
+              for (var i = 0; i < $scope.label.length; i++) {
+                redraw(true, i);
+              }
+              newshape();
+          },
+          function error(res) {
+              console.warn('could not get label', res.status, res.data)
+          })
+          // for (var i = 0; i < $scope.label.length; i++) {
+          	// redraw(true, i);
+        // }
+        // newshape();
+          // clearanddraw();
         };
         img1.src = $scope.img_url;
 
