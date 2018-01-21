@@ -13,9 +13,14 @@
     </div>
     <div class="grounder-dir-images">
         <h4>Images</h4>
-        <div class="custom-file pull-right">
-          <input id="grounder-upload-box" type="file" class="custom-file-input" id="customFile">
-          <label class="custom-file-label" for="customFile">Choose file</label>
+        <div class="input-group mb-3">
+          <div class="custom-file">
+            <input id="grounder-upload-box" type="file" class="custom-file-input" id="customFile">
+            <label class="custom-file-label" for="customFile">Choose file</label>
+          </div>
+          <div class="input-group-append">
+            <button ng-click="upload()" class="btn btn-success" id="basic-addon2">Upload</button>
+          </div>
         </div>
         <ul>
             <li ng-repeat="image in images">

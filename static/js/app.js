@@ -1,4 +1,4 @@
-var app = angular.module("Grounder", ["ngRoute"])
+var app = angular.module("Groundr", ["ngRoute"])
 app.config(function($routeProvider) {
   $routeProvider
   .when("/", {
@@ -278,6 +278,24 @@ app.controller("dirCtrl", function($scope, $routeParams, $http) {
     $scope.reset = function () {
         $scope.label = $scope.old_label
     }
+
+    $scope.upload = function() {
+        var file_form = document.getElementById('grounder-upload-box')
+        if (file_form.files.length != 1) {
+            console.warn('No file selected')
+            return
+        }
+        var formData = new FormData()
+        formData.append('user-upload', file_form.files[0], file_form.files[0].name)
+        $http.post("/api/upload" + $scope.dir).then(
+        function success(res) {
+          console.log('upload successful')
+        },
+        function error(res) {
+          console.warn('error uploading file', res.status, res.data)
+        })
+    }
+
     console.log("dir");
 });
 
