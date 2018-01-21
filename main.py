@@ -22,11 +22,9 @@ def index():
 def statics(file):
     return app.send_static_file(file)
 
-
-@app.route('/api/img/<path:my_path>', methods=['GET', 'POST'])
+@app.route('/api/img/<path:my_path>', methods=['GET'])
 def img_open(my_path=None):
-    if request.method == 'GET':
-        return app.send_static_file(os.path.join('data/', (my_path + '.png')))
+    return app.send_static_file(os.path.join('data/', (my_path + '.png')))
 
 
 @app.route('/api/label/<path:my_path>', methods=['GET', 'POST'])
@@ -93,23 +91,6 @@ def api_dir(my_path=''):
             return jsonify(dicti)
         else:
             return 'GENERAL KENOBI!'
-
-
-@app.route('/json/<path:my_path>', methods=['GET', 'POST'])
-def api_json():
-    if request.method == 'POST':
-        # do_edit_json()
-        return 'General Kenobi!'
-    else:
-        return send_from_directory('view', my_path)
-        # response = requests.get('/view/<path:my_path>')
-        # response_json = jsonify(all=response.text)
-        # return render_template(
-        #   'results.html',
-        #   form=ReqForm(request.form),
-        #   response=response_json,
-        #   date=datetime.datetime.now()
-        # )
 
 @app.route('/api/template/', methods=['GET', 'POST'])
 @app.route('/api/template/<path:my_path>', methods=['GET', 'POST'])
