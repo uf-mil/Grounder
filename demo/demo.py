@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from flask import Flask, request, render_template, redirect
 import os
 import sys
