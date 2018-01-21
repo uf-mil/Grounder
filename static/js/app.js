@@ -146,17 +146,15 @@ app.controller("imgCtrl", function($scope, $routeParams, $http, $location) {
         canvas_back = document.getElementById('canvas_back')
         context_back = canvas_back.getContext("2d");
 
-        $('#canvas_back').each(function() {
-            var img1 = new Image();
-            img1.onload = function() {
-                context_back.drawImage(this, 0, 0);
-            };
-            img1.src = $scope.img_url;
-            canvas_back.height = img1.height;
-            canvas_back.width = img1.width;
-            canvas.height = img1.height;
-            canvas.width = img1.width;
-        });
+        var img1 = new Image();
+        img1.onload = function() {
+            context_back.drawImage(this, 0, 0);
+        };
+        img1.src = $scope.img_url;
+        canvas_back.height = img1.height;
+        canvas_back.width = img1.width;
+        canvas.height = img1.height;
+        canvas.width = img1.width;
 
         $('#canvas').mousedown(function(e) {
             var mouseX = e.pageX - $('#canvas').parent().position().left - $('#canvas').position().left;
