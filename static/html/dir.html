@@ -4,7 +4,7 @@
         <a ng-href="#!/template{{dir}}" type="button" class="btn btn-info float-right">Edit Template</a>
     </h3>
     <div class="grounder-dir-children">
-        <h4 ng-if="children.length > 0">Subdirectories</h4>
+        <h4>Subdirectories</h4>
         <ul>
             <li ng-repeat="child in children">
                 <a ng-href="/#!/dir{{dir}}{{child}}">{{child}}</a>
