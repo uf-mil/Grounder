@@ -45,9 +45,6 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
       this.label = new Label();
     }
 
-    var currentShape = 0;
-    // var shapes = new Array();
-    // shapes.push(new Shape());
     var paint;
 
 
@@ -75,8 +72,7 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
         for (var i = 0; i < $scope.label.length; i++) {
           redraw(true, i);
         }
-        // $scope.label.push(new Shape());
-            newshape();
+        newshape();
     },
     function error(res) {
         console.warn('could not get label', res.status, res.data)
@@ -233,6 +229,7 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
             done_drawing = false;
         }
 
+        // Only load in stuff, don't try to create new shapes
         if (load == true) {
             context.fillStyle = 'rgba(0,0,0,.2)';
             context.fill();
@@ -381,6 +378,7 @@ app.controller("templateCtrl", function($scope, $routeParams, $http) {
     $scope.remove = function(index) {
         $scope.template['classes'].splice(index, 1);
     }
+
     $scope.add = function() {
         $scope.template['classes'].push('');
     }
