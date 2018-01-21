@@ -77,6 +77,7 @@ def next(my_path=''):
         split = os.path.splitext(resolved)
         if split[1] == '.png' and not os.path.isfile(split[0] + '.json'):
             return os.path.splitext(filename)[0]
+    return Response(status=404, response='')
 
 @app.route('/api/dir/', methods=['GET', 'POST'])
 @app.route('/api/dir/<path:my_path>', methods=['GET', 'POST'])
