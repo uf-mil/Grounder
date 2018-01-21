@@ -1,10 +1,10 @@
 <div>
     <h3>Directory
         <a ng-href="#!/dir/">/</a><span ng-repeat="parent in parents"><a  ng-href="/#!/dir/{{parent.href}}">{{parent.name}}</a>/</span>
+        <a ng-href="#!/template{{dir}}" type="button" class="btn btn-info float-right">Edit Template</a>
     </h3>
-    <a ng-href="#!/template{{dir}}" type="button" class="btn btn-info">Edit Template</a>
     <div class="grounder-dir-children">
-        <h4>Subdirectories</h4>
+        <h4 ng-if="children.length > 0">Subdirectories</h4>
         <ul>
             <li ng-repeat="child in children">
                 <a ng-href="/#!/dir{{dir}}{{child}}">{{child}}</a>
@@ -13,6 +13,10 @@
     </div>
     <div class="grounder-dir-images">
         <h4>Images</h4>
+        <div class="custom-file pull-right">
+          <input id="grounder-upload-box" type="file" class="custom-file-input" id="customFile">
+          <label class="custom-file-label" for="customFile">Choose file</label>
+        </div>
         <ul>
             <li ng-repeat="image in images">
                 <a ng-href="/#!/img{{dir}}{{image}}">{{image}}</a>

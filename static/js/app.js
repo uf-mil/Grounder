@@ -17,11 +17,14 @@ app.config(function($routeProvider) {
       templateUrl: "/html/dir.html",
       controller: "dirCtrl"
   })
-  .when("/template:template*", {
+  .when("/template/:dir*/", {
       templateUrl: "/html/template.html",
       controller: "templateCtrl"
   })
-  .when("/template", {redirectTo: "/template/"})
+  .when("/template", {
+      templateUrl: "/html/template.html",
+      controller: "templateCtrl"
+   })
   .otherwise({
       templateUrl: "/html/404.html"
   });
@@ -77,6 +80,17 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
     },
     function error(res) {
         console.warn('could not get label', res.status, res.data)
+    })
+
+    $scope.template = {'classes': ['Buoy', 'STC', 'Dock'] } // Test default
+    $http.get('/api/template' + $scope.dir).then(
+    function success(res) {
+        $scope.template = res.data
+        if ($scope.template['classes'] == undefined) $scope.template['classes'] = []
+        console.log($scope.template)
+    },
+    function error(res) {
+        console.warn('could not get template', res.status, res.data)
     })
 
     $scope.save = function() {
@@ -267,10 +281,25 @@ app.controller("dirCtrl", function($scope, $routeParams, $http) {
 });
 
 app.controller("templateCtrl", function($scope, $routeParams, $http) {
-    $scope.template = {'classes': ['Buoy', 'STC', 'Dock'] }
-    $scope.template_path = $routeParams.template
+    $scope.dir = $routeParams.dir == undefined ? '/' : $routeParams.dir
+    if ($scope.dir[0] != '/') $scope.dir = '/' + $scope.dir
+    if ($scope.dir.length > 1 && $scope.dir[-1] != '/') $scope.dir += '/'
 
-    $http.get('/api/template' + $scope.template_path).then(
+    split = $scope.dir.split('/')
+    if (split.length == 2) split = []
+    else split = split.slice(1, -1)
+    $scope.parents = []
+    if (split.length > 0)
+        $scope.parents.push({'name': split[0], 'href': split[0]})
+    for (var i = 1; i < split.length; i++)
+    {
+        console.log($scope.parents)
+        $scope.parents.push({'name': split[i], 'href': $scope.parents[i - 1]['href'] + '/' + split[i]})
+    }
+
+    $scope.template = {'classes': ['Buoy', 'STC', 'Dock'] }
+
+    $http.get('/api/template' + $scope.dir).then(
     function success(res) {
         $scope.template = res.data
         if ($scope.template['classes'] == undefined) $scope.template['classes'] = []
@@ -287,7 +316,7 @@ app.controller("templateCtrl", function($scope, $routeParams, $http) {
         $scope.template['classes'].push('');
     }
     $scope.save = function() {
-        $http.post("/api/template" + $scope.template_path, $scope.template).then(
+        $http.post("/api/template" + $scope.dir, $scope.template).then(
         function success(res) {
             console.log('save good')
         },
