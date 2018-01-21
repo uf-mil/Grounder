@@ -30,7 +30,7 @@ app.config(function($routeProvider) {
   });
 });
 
-app.controller("imgCtrl", function($scope, $routeParams, $http) {
+app.controller("imgCtrl", function($scope, $routeParams, $http, $location) {
     function Label() {
       this.class = "";
     }
@@ -47,6 +47,23 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
 
     var paint;
 
+
+    $scope.next = function() {
+        $http.get("/api/next" + $scope.dir).then(
+        function success(res) {
+            change = '/img' + $scope.dir + res.data
+            console.log(res.data, change, $location.url())
+            if (change == $location.url())
+            {
+                console.warn('next image is current image')
+                return
+            }
+            $location.url(change)
+        },
+        function error(res) {
+            console.warn('could not get image', res.status, res.data)
+        })
+    }
 
     $scope.img = $routeParams.img;
     function split_dir_img(str)
@@ -296,7 +313,7 @@ app.controller("dirCtrl", function($scope, $routeParams, $http) {
 
     $http.get("/api/dir" + $scope.dir).then(
     function success(res) {
-        if (typeof(res.object) != "object") {
+        if (typeof(res.data) != "object") {
             console.warn('dir response is not json')
         }
         $scope.children = res.data['children'] === undefined ? [] : res.data['children']

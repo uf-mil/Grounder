@@ -67,14 +67,16 @@ def api_upload(my_path=''):
 @app.route('/api/next/', methods=['GET'])
 @app.route('/api/next/<path:my_path>', methods=['GET'])
 def next(my_path=''):
-    if os.path.isdir(os.path.join('static/data', my_path)):
-        iteration = 0
-        for file in os.listdir(os.path.join('static/data', my_path)):
-            # Find the image and make sure it isn't already labelled
-            # print(os.path.join(os.path.splitext(file)[0], '.json'))
-            if file.endswith('.png') and (os.path.isfile(os.path.join(os.path.splitext(file)[0], '.json')) == False):
-                return os.path.splitext(file)[0]
-    return 'Ah, General Kenobi!'
+    path = os.path.join('static/data', my_path)
+    if not os.path.isdir(path):
+        return Response(status=400, response='not a directory')
+    for filename in os.listdir(path):
+        # Find the image and make sure it isn't already labelled
+        # print(os.path.join(os.path.splitext(file)[0], '.json'))
+        resolved = os.path.join(path, filename)
+        split = os.path.splitext(resolved)
+        if split[1] == '.png' and not os.path.isfile(split[0] + '.json'):
+            return os.path.splitext(filename)[0]
 
 @app.route('/api/dir/', methods=['GET', 'POST'])
 @app.route('/api/dir/<path:my_path>', methods=['GET', 'POST'])
