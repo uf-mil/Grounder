@@ -106,7 +106,17 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
     }
 
     $scope.reset = function () {
-        $scope.label = $scope.old_label
+      $scope.old_label = {}
+      $scope.label = new Array();
+      $scope.label.push(new Shape());
+      context.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+     $scope.undo = function () {
+        $scope.label = $scope.old_label;
+        $scope.label = $scope.label.slice(0,-1);
+        clearanddraw();
+        newshape();
     }
 
     var paint;
@@ -140,7 +150,6 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
             var mouseX = e.pageX - $('#canvas').parent().position().left - $('#canvas').position().left;
             var mouseY = e.pageY - $('#canvas').parent().position().top - $('#canvas').position().top;
 
-            console.log(mouseX)
             paint = true;
             addClick(mouseX, mouseY);
             redraw(false, $scope.label.length-1);
@@ -173,7 +182,6 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
 
 
     function redraw(load, currentShape) {
-      // context.clearRect(0, 0, canvas.width, canvas.height);
       // console.log($scope.label)
       var points = $scope.label[currentShape].points;
       if (load == true)
@@ -226,6 +234,7 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
 
             context.fillText(getdisplaylabel(currentShape), points[0].x, points[0].y-30); 
 
+            $scope.old_label = $scope.label.slice()
             newshape();
             done_drawing = false;
         }
@@ -237,6 +246,13 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
             context.font = "30px Arial"
             context.fillText(getdisplaylabel(currentShape), points[0].x, points[0].y-30); 
         }
+    }
+
+    function clearanddraw() {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      for (var i = 0; i < $scope.label.length; i++) {
+          redraw(true, i);
+      }
     }
 
     function getdisplaylabel(currentShape) {
