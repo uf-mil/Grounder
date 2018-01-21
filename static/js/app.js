@@ -96,7 +96,7 @@ app.controller("imgCtrl", function($scope, $routeParams, $http, $location) {
     })
 
     $scope.x = ''
-    $scope.template = {'classes': ['Buoy', 'STC', 'Dock'] } // Test default
+    $scope.template = {'classes': [] } // Test default
     $http.get('/api/template' + $scope.dir).then(
     function success(res) {
         $scope.template = res.data
@@ -378,7 +378,7 @@ app.controller("templateCtrl", function($scope, $routeParams, $http) {
         $scope.parents.push({'name': split[i], 'href': $scope.parents[i - 1]['href'] + '/' + split[i]})
     }
 
-    $scope.template = {'classes': ['Buoy', 'STC', 'Dock'] }
+    $scope.template = {'classes': [] }
 
     $http.get('/api/template' + $scope.dir).then(
     function success(res) {
