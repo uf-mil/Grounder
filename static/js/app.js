@@ -289,7 +289,7 @@ app.controller("dirCtrl", function($scope, $routeParams, $http) {
 
     $http.get("/api/dir" + $scope.dir).then(
     function success(res) {
-        if (res.object != "object") {
+        if (typeof(res.object) != "object") {
             console.warn('dir response is not json')
         }
         $scope.children = res.data['children'] === undefined ? [] : res.data['children']
@@ -320,6 +320,22 @@ app.controller("dirCtrl", function($scope, $routeParams, $http) {
         })
     }
 
+    $scope.newdir = ''
+    $scope.createDirectory = function() {
+      if ($scope.newdir.length < 1) {
+        console.warn('cannot create directory with empty name')
+        return
+      }
+      console.log('/api/dir' + $scope.dir +  $scope.newdir)
+      $http.post('/api/dir' + $scope.dir + $scope.newdir).then(
+      function success (res) {
+        // should reload page or something here
+        console.log('create directory successful')
+      },
+      function error (res) {
+        console.warn('error creating directory', res.status, res.data)
+      })
+    }
     console.log("dir");
 });
 
