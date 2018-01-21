@@ -9,6 +9,14 @@
             <li ng-repeat="child in children">
                 <a ng-href="/#!/dir{{dir}}{{child}}">{{child}}</a>
             </li>
+            <li>
+              <div class="input-group mb-3">
+                <input ng-model="newdir" type="text" class="form-control" placeholder="MyDirectory" aria-label="Recipient's username" aria-describedby="basic-addon2">
+                <div class="input-group-append">
+                  <button ng-model="newdir" ng-click="createDirectory()" class="btn btn-success" id="basic-addon2">Create</button>
+                </div>
+              </div>
+            </li>
         </ul>
     </div>
     <div class="grounder-dir-images">
