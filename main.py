@@ -101,21 +101,16 @@ def api_dir(my_path=''):
 @app.route('/api/template/<path:my_path>', methods=['GET', 'POST'])
 def api_template(my_path=''):
     if request.method == 'GET':
-        my_path_temp = os.path.join('data/', my_path)
-        flag = os.path.isfile(os.path.join('data/', my_path, 'template.json'))
-        if flag:
-            return app.send_static_file(os.path.join('data/', my_path , 'template.json'))
-        else:
-            iterations =  0
-            while flag is False:
-                my_path_temp = os.path.join(my_path_temp, '../')
-                flag = os.path.isfile(os.path.join('data/', my_path_temp, 'template.json'))
-                iterations = iterations + 1
-                if iterations == 3:
-                    return 'Failure'
-            shutil.copy2(my_path_temp, os.path.join('data/', my_path))
-            return os.path.join('data/', my_path, 'template.json')
-        
+        iterations = 0
+        my_path = os.path.join('static/data/', my_path)
+        while not os.path.isfile(os.path.join(my_path, 'template.json')):
+            my_path = os.path.normpath(os.path.join(my_path, '../'))
+            print(my_path)
+            iterations = iterations + 1
+            if my_path== 'static' or iterations == 500:
+                return Response(status=404, response='Unable to find parent template')
+        with open(os.path.join(my_path, 'template.json'), 'r') as f:
+            return json.dumps(json.load(f)), 200, {'ContentType': 'application/json'}
     elif request.method == 'POST':
         with open(os.path.join('static/data/', my_path,  'template.json'), "w+") as outfile:
             json.dump(request.get_json(), outfile, sort_keys=True, indent=4)
