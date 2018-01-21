@@ -97,7 +97,7 @@ def api_dir(my_path=''):
             dicti = {'children': child_dirs, 'images': child_imgs}
             return jsonify(dicti)
         else:
-            return 'GENERAL KENOBI!'
+            return Response(status=400, response='Unable to find path')
 
 @app.route('/api/template/', methods=['GET', 'POST'])
 @app.route('/api/template/<path:my_path>', methods=['GET', 'POST'])
