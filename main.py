@@ -87,7 +87,7 @@ def api_data(my_path=None):
         return my_path if my_path is not None else 'No path'
 
 
-@app.route('/api/dir/')
+@app.route('/api/dir/', methods=['GET', 'POST'])
 @app.route('/api/dir/<path:my_path>', methods=['GET', 'POST'])
 def api_dir(my_path=''):
     if request.method == 'POST':
@@ -122,6 +122,19 @@ def api_json():
         #   response=response_json,
         #   date=datetime.datetime.now()
         # )
+
+@app.route('/api/template/', methods=['GET', 'POST'])
+@app.route('/api/template/<path:my_path>', methods=['GET', 'POST'])
+def api_template(my_path=''):
+    if request.method == 'GET':
+        print(os.path.join('data/', my_path, 'template.json'))
+        return app.send_static_file(os.path.join('data/', my_path , 'template.json'))
+    elif request.method == 'POST':
+        with open(os.path.join('static/data/', my_path,  'template.json'), "w+") as outfile:
+            json.dump(request.get_json(), outfile, sort_keys=True, indent=4)
+        return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
+
+
 
 if __name__ == '__main__':
     app.run(debug=True, host=host, port=port)
