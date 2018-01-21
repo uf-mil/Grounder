@@ -21,7 +21,7 @@ def button():
     			break
 
         # Launch the docker container
-        ports[port-5000] = client.containers.run("grounder", detach=True, command="./root/start.sh 0.0.0.0 " + str(port), ports={str(port) + '/tcp': str(port)})
+        ports[port-5000] = client.containers.run("groundr", detach=True, command="./root/start.sh 0.0.0.0 " + str(port), ports={str(port) + '/tcp': str(port)})
         time.sleep(1.5)
 
         # Redirect the user to the newly launched docker container
