@@ -287,7 +287,7 @@ app.controller("dirCtrl", function($scope, $routeParams, $http) {
         }
         var formData = new FormData()
         formData.append('user-upload', file_form.files[0], file_form.files[0].name)
-        $http.post("/api/upload" + $scope.dir).then(
+        $http.post("/api/upload" + $scope.dir, formData, {'headers': {'Content-Type': undefined}}).then(
         function success(res) {
           console.log('upload successful')
         },
