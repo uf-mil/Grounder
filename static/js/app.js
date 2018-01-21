@@ -33,6 +33,7 @@ app.config(function($routeProvider) {
 app.controller("imgCtrl", function($scope, $routeParams, $http) {
     function Label() {
       this.name = "";
+      this.class = "";
     }
 
     function Point(x, y) {
@@ -112,26 +113,36 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
     var context;
     var done_drawing = false;
 
+    $('#templates').change(function() {
+      $scope.label[$scope.label.length-1].label.class = $('#templates').find(":selected").text();
+    });
 
     function prepare() {
         canvas = document.getElementById('canvas')
         context = canvas.getContext("2d");
 
-        $('#canvas').each(function() {
+        canvas_back = document.getElementById('canvas_back')
+        context_back = canvas_back.getContext("2d");
+
+        $('#canvas_back').each(function() {
             var img1 = new Image();
             img1.onload = function() {
-                context.drawImage(this, 0, 0);
+                context_back.drawImage(this, 0, 0);
             };
             img1.src = $scope.img_url;
-            console.log(img1.src);
+            canvas_back.height = img1.height;
+            canvas_back.width = img1.width;
+            canvas.height = img1.height;
+            canvas.width = img1.width;
         });
 
         $('#canvas').mousedown(function(e) {
-            var mouseX = e.pageX - this.offsetLeft;
-            var mouseY = e.pageY - this.offsetTop;
+            var mouseX = e.pageX - $('#canvas').parent().position().left - $('#canvas').position().left;
+            var mouseY = e.pageY - $('#canvas').parent().position().top - $('#canvas').position().top;
 
+            console.log(mouseX)
             paint = true;
-            addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
+            addClick(mouseX, mouseY);
             redraw(false, $scope.label.length-1);
         });
 
@@ -154,7 +165,6 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
 
     function addClick(x, y, dragging) {
       var points = $scope.label[$scope.label.length-1].points;
-        console.log($scope.label[$scope.label.length-1].points)
         if (points.length > 0 && nearby(points[0], new Point(x,y), 20) == true) {
           done_drawing = true;
         }
@@ -163,6 +173,7 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
 
 
     function redraw(load, currentShape) {
+      // context.clearRect(0, 0, canvas.width, canvas.height);
       // console.log($scope.label)
       var points = $scope.label[currentShape].points;
       if (load == true)
@@ -179,7 +190,6 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
         // TODO: Need to have layers so that we can refresh the drawings
         // Begin a path that we can fill when done
         context.beginPath();
-        console.log(points)
         context.moveTo($scope.label[currentShape].points[0].x, $scope.label[currentShape].points[0].y);
         for (var i = 0; i < $scope.label[currentShape].points.length; i++) {
 
@@ -206,10 +216,15 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
             points.splice(-1,1)
             context.fillStyle = 'rgba(0,0,0,.2)';
             context.fill();
-            $scope.label[currentShape].label = $('#label_txt').val();
+            text_label = $('#label_txt').val()
+            if (text_label != "")
+            {
+              $scope.label[currentShape].label.name = $('#label_txt').val();  
+            }
             context.fillStyle = "rgba(0,0,255,1)";
             context.font = "30px Arial"
-            context.fillText($scope.label[currentShape].label, points[0].x, points[0].y-30); 
+
+            context.fillText(getdisplaylabel(currentShape), points[0].x, points[0].y-30); 
 
             newshape();
             done_drawing = false;
@@ -220,13 +235,23 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
             context.fill();
             context.fillStyle = "rgba(0,0,255,1)";
             context.font = "30px Arial"
-            context.fillText($scope.label[currentShape].label, points[0].x, points[0].y-30); 
+            context.fillText(getdisplaylabel(currentShape), points[0].x, points[0].y-30); 
         }
+    }
+
+    function getdisplaylabel(currentShape) {
+        display = "";
+        $.each($scope.label[currentShape].label, function(i,n){
+          if (n != "") {
+            display = n;
+            return false;
+          }
+        });
+        return display;
     }
 
     // Check if two points  are close to each other
     function nearby(p1, p2, amount) {
-      console.log(p1, p2)
         if ((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y) < amount * amount) {
             return true;
         } else {
@@ -236,7 +261,6 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
 
     // Add a new shape
     function newshape() {
-      console.log('Creating new shape')
       $scope.label.push(new Shape());
     }
     prepare();
