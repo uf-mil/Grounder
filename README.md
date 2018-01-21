@@ -1,9 +1,13 @@
 # The Groundr Project
+###### Created at [SwampHacks 2018](http://2018.swamphacks.com/public/index.html)
 ###### Inspired by LabelMe
 
 It is well established that Machine Learning solutions require large amounts of labelled data to 'train' themselves. Data rarely comes labelled however, and so any team that wishes to deploy a Machine Learning solution will have to write a program to label the data for them or do it manually. This is a signficant expendature of resources that is often repeated with each new solution. The Groundr project seeks to provide a unified tool set to label data in a quick and user friendly fashion. Users can upload their image libraries, organize them into directories of their choice, and begin labelling the images. The labelling interface supports indicating a region of interest and assigning multiple attributes or labels to it. This information is automatically saved as a json file and stored alongside the image. The software automatically cycles the user through the directory until there are no more images without json files. Users can access each file individually as they see fit and edit their labels. 
 
 The entire system is hosted by each institution on their own servers. 
+
+###### [Try it out](groundr.org)
+
 
 ### Build Status:
 Version 0.0.1 Building properly. 
@@ -19,9 +23,12 @@ Version 0.0.1 Building properly.
 Installation is quick and straightforward:
 
 ```
-Clone the above repo onto your server of choice. 
+Clone the above repo onto your server of choice.
+
+git clone git@github.com:uf-mil/Groundr.git
+
 If you wish to change which ports and host location the UI is displayed at, make those changes in the main.py file at the top. 
-In server console type 'flask run'.
+In server console run ./main.py
 Enjoy!
 ```
 ## How to Use:
@@ -49,7 +56,6 @@ Further development should be directed towards improving the user interface and 
 * Search tool to search for images by label
 * Improved User Interface
 * Delete old Docker Containers in Demo. 
-* Add PHP to make it look nice and react to changes (such as previewing the file name when uploading)
 
 Credits:
 Machine Intelligence Lab, University of Florida
