@@ -4,14 +4,18 @@ from glob import glob
 from flask import Flask, Response, request, render_template, redirect, url_for, send_from_directory, jsonify
 from werkzeug.utils import secure_filename
 import json
+import shutil
+
+# To change the default port and host, modify the following variables: 
+PORT = 5000
+HOST = '0.0.0.0'
 
 app = Flask(__name__, static_url_path='/static')
-port = 5000
-host = '0.0.0.0'
+
 if 'port' in os.environ:
-    port = int(os.environ['port'])
+    PORT = int(os.environ['port'])
 if 'host' in os.environ:
-    host = os.environ['host']
+    HOST = os.environ['host']
 
 @app.route('/')
 def index():
@@ -60,6 +64,7 @@ def api_upload(my_path=''):
         f.save(writefile)
     return Response(status=200)
 
+@app.route('/api/next/', methods=['GET'])
 @app.route('/api/next/<path:my_path>', methods=['GET'])
 def next(my_path=''):
     if os.path.isdir(os.path.join('static/data', my_path)):
@@ -85,7 +90,7 @@ def api_dir(my_path=''):
             child_dirs = [name for name in os.listdir(
                 my_path) if os.path.isdir(os.path.join(my_path, name))]
             child_imgs = [os.path.splitext(name)[0] for name in os.listdir(
-                my_path) if os.path.isfile(os.path.join(my_path, name))]
+                my_path) if os.path.isfile(os.path.join(my_path, name)) and name.endswith('.png')]
             print(my_path)
             dicti = {'children': child_dirs, 'images': child_imgs}
             return jsonify(dicti)
@@ -96,8 +101,21 @@ def api_dir(my_path=''):
 @app.route('/api/template/<path:my_path>', methods=['GET', 'POST'])
 def api_template(my_path=''):
     if request.method == 'GET':
-        print(os.path.join('data/', my_path, 'template.json'))
-        return app.send_static_file(os.path.join('data/', my_path , 'template.json'))
+        my_path_temp = os.path.join('data/', my_path)
+        flag = os.path.isfile(os.path.join('data/', my_path, 'template.json'))
+        if flag:
+            return app.send_static_file(os.path.join('data/', my_path , 'template.json'))
+        else:
+            iterations =  0
+            while flag is False:
+                my_path_temp = os.path.join(my_path_temp, '../')
+                flag = os.path.isfile(os.path.join('data/', my_path_temp, 'template.json'))
+                iterations = iterations + 1
+                if iterations == 3:
+                    return 'Failure'
+            shutil.copy2(my_path_temp, os.path.join('data/', my_path))
+            return os.path.join('data/', my_path, 'template.json')
+        
     elif request.method == 'POST':
         with open(os.path.join('static/data/', my_path,  'template.json'), "w+") as outfile:
             json.dump(request.get_json(), outfile, sort_keys=True, indent=4)
@@ -106,4 +124,4 @@ def api_template(my_path=''):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host=host, port=port)
+    app.run(debug=True, host=HOST, port=PORT)
