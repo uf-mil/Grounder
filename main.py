@@ -19,6 +19,7 @@ if 'host' in os.environ:
     host = os.environ['host']
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -28,35 +29,33 @@ def allowed_file(filename):
 def index():
     return app.send_static_file('index.html')
 
+
 @app.route('/<path:file>')
 def statics(file):
     return app.send_static_file(file)
 
-@app.route('/test/<test_in>')
-def test(test_in):
-    return render_template("test.html", test_in = test_in)
 
 @app.route('/api/img/<path:my_path>', methods=['GET', 'POST'])
 def img_open(my_path=None):
     if request.method == 'GET':
         return app.send_static_file(os.path.join('data/', (my_path + '.png')))
 
+
 @app.route('/api/label/<path:my_path>', methods=['GET', 'POST'])
 def api_label(my_path=None):
     if request.method == 'POST':
-        with open(os.path.join('data/', (my_path + '.json')), "w+") as outfile:
+        with open(os.path.join('static/data/', (my_path + '.json')), "w+") as outfile:
             json.dump(request.get_json(), outfile, sort_keys=True, indent=4)
-        return json.dumps({'success':True}), 200, {'ContentType':'application/json'} 
+        return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
     elif request.method == 'GET':
-        file = os.path.join('data/', (my_path + '.json'))
+        file = os.path.join('static/data/', (my_path + '.json'))
         if not os.path.isfile(file):
             return Response(status=404, mimetype='application/json')
         with open(file, 'r') as f:
-            return json.dumps({'success':True, 'data':json.load(f)}), 200, {'ContentType':'application/json'} 
+            return json.dumps({json.load(f)}), 200, {'ContentType': 'application/json'}
 
 
-@app.route('/view')
-@app.route('/view/<path:my_path>', methods=['GET', 'POST'])
+@app.route('/api/upload/<path:my_path>', methods=['GET', 'POST'])
 def api_data(my_path=None):
     if request.method == 'POST':
         # check if the post request has the file part
@@ -73,7 +72,7 @@ def api_data(my_path=None):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             return redirect(url_for('uploaded_file',
-                                filename=filename))
+                                    filename=filename))
         return '''
         <!doctype html>
         <title>Upload new File</title>
@@ -86,6 +85,8 @@ def api_data(my_path=None):
 
     else:
         return my_path if my_path is not None else 'No path'
+
+
 @app.route('/api/dir/')
 @app.route('/api/dir/<path:my_path>', methods=['GET', 'POST'])
 def api_dir(my_path=''):
@@ -95,14 +96,17 @@ def api_dir(my_path=''):
     else:
         my_path = os.path.join('static/data/', my_path)
         if os.path.isdir(my_path):
-            child_dirs = [name for name in os.listdir(my_path) if os.path.isdir(os.path.join(my_path, name))]
-            child_imgs = [os.path.splitext(name)[0] for name in os.listdir(my_path) if os.path.isfile(os.path.join(my_path, name))]
+            child_dirs = [name for name in os.listdir(
+                my_path) if os.path.isdir(os.path.join(my_path, name))]
+            child_imgs = [os.path.splitext(name)[0] for name in os.listdir(
+                my_path) if os.path.isfile(os.path.join(my_path, name))]
             print(my_path)
             dicti = {'children': child_dirs, 'images': child_imgs}
             return jsonify(dicti)
         else:
             return 'GENERAL KENOBI!'
-@app.route('/json')
+
+
 @app.route('/json/<path:my_path>', methods=['GET', 'POST'])
 def api_json():
     if request.method == 'POST':
@@ -119,13 +123,5 @@ def api_json():
         #   date=datetime.datetime.now()
         # )
 
-@app.route('/temp')
-@app.route('/temp/<path:my_path>', methods=['GET', 'POST'])
-def api_temp():
-    if request.method == 'POST':
-        return 'General Kenobi!'
-    else:
-        return 'Hello there!'
-
 if __name__ == '__main__':
-    app.run(debug=True,host=host, port=port)
+    app.run(debug=True, host=host, port=port)
