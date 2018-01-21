@@ -67,8 +67,7 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
 
     $http.get("/api/label" + $scope.img).then(
     function success(res) {
-        console.log(res.data.data)
-        $scope.old_label = res.data.data
+        $scope.old_label = res.data
         $scope.label = $scope.old_label
         for (var i = 0; i < $scope.label.length; i++) {
           redraw(true, i);
