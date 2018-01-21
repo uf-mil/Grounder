@@ -28,6 +28,26 @@ app.config(function($routeProvider) {
 });
 
 app.controller("imgCtrl", function($scope, $routeParams, $http) {
+    function Label() {
+      this.name = "";
+    }
+
+    function Point(x, y) {
+      this.x = x;
+      this.y = y;
+    }
+
+    function Shape() {
+      this.points = new Array();
+      this.label = new Label();
+    }
+
+    var currentShape = 0;
+    // var shapes = new Array();
+    // shapes.push(new Shape());
+    var paint;
+
+
     $scope.img = $routeParams.img;
     function split_dir_img(str)
     {
@@ -42,19 +62,26 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
     $scope.dir = split_dir_img($scope.img)
     $scope.img_url = "/api/img" + $scope.img
     $scope.old_label = {}
-    $scope.label = {}
+    $scope.label = new Array();
+    $scope.label.push(new Shape());
 
     $http.get("/api/label" + $scope.img).then(
     function success(res) {
-        $scope.old_label = res.data
+        console.log(res.data.data)
+        $scope.old_label = res.data.data
         $scope.label = $scope.old_label
+        for (var i = 0; i < $scope.label.length; i++) {
+          redraw(true, i);
+        }
+        // $scope.label.push(new Shape());
+            newshape();
     },
     function error(res) {
         console.warn('could not get label', res.status, res.data)
     })
 
     $scope.save = function() {
-        $http.post("/api/label" + $scope.img, $scope.label).then(
+        $http.post("/api/label" + $scope.img, $scope.label.slice(0,-1)).then(
         function success(res) {
             console.log("Saved");
         },
@@ -67,12 +94,10 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
         $scope.label = $scope.old_label
     }
 
-
-    var currentShape = 0;
-    var shapes = new Array();
-    shapes.push(new Shape());
     var paint;
     var context;
+    var done_drawing = false;
+
 
     function prepare() {
         canvas = document.getElementById('canvas')
@@ -93,7 +118,7 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
 
             paint = true;
             addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
-            redraw();
+            redraw(false, $scope.label.length-1);
         });
 
         // TODO: Regular drawing
@@ -111,52 +136,42 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
         });
     }
 
-    function Label() {
-      this.name = "";
-    }
-
-    function Point(x, y) {
-      this.x = x;
-      this.y = y;
-    }
-
-    function Shape() {
-      this.points = new Array();
-      this.label = new Label();
-    }
-
-    // var points = new Array();
-    var currentShape = 0;
-    var shapes = new Array();
-    shapes.push(new Shape());
-    var paint;
-
     // var $div = $("<input>", {type: "text", "id": "txt_name"});
 
     function addClick(x, y, dragging) {
-        shapes[currentShape].points.push(new Point(x,y));
-    }
-
-    function redraw() {
-      var points = shapes[currentShape].points;
-
-      // Check if we are closing the contour
-        var done_drawing = false;
-        if (points.length > 1 && nearby(points[points.length - 1], points[0], 20) == true) {
+      var points = $scope.label[$scope.label.length-1].points;
+        console.log($scope.label[$scope.label.length-1].points)
+        if (points.length > 0 && nearby(points[0], new Point(x,y), 20) == true) {
           done_drawing = true;
         }
+        $scope.label[$scope.label.length-1].points.push(new Point(x,y));
+    }
+
+
+    function redraw(load, currentShape) {
+      // console.log($scope.label)
+      var points = $scope.label[currentShape].points;
+      if (load == true)
+      {
+            points.push(points[0]);
+      }
+
+      // Check if we are closing the contour
+        
         context.strokeStyle = "#df4b26";
         context.lineJoin = "round";
         context.lineWidth = 5;
 
+        // TODO: Need to have layers so that we can refresh the drawings
         // Begin a path that we can fill when done
         context.beginPath();
-        context.moveTo(shapes[currentShape].points[0].x, shapes[currentShape].points[0].y);
-        for (var i = 0; i < shapes[currentShape].points.length; i++) {
+        console.log(points)
+        context.moveTo($scope.label[currentShape].points[0].x, $scope.label[currentShape].points[0].y);
+        for (var i = 0; i < $scope.label[currentShape].points.length; i++) {
 
           // Draw a line from current point to previous
-            if (shapes[currentShape].points.length > 1) {
-                context.lineTo(shapes[currentShape].points[i].x, shapes[currentShape].points[i].y);
+            if ($scope.label[currentShape].points.length > 1) {
+                context.lineTo($scope.label[currentShape].points[i].x, $scope.label[currentShape].points[i].y);
             }
 
             // If we do not have a closed contour, keep drawing new circles
@@ -174,19 +189,30 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
 
         // If we have a closed contour, color, add text, and create new shape
         if (done_drawing == true) {
-          context.fillStyle = 'rgba(0,0,0,.2)';
+            points.splice(-1,1)
+            context.fillStyle = 'rgba(0,0,0,.2)';
             context.fill();
-            shapes[currentShape].label = $('#label_txt').val();
-          context.fillStyle = "rgba(0,0,255,1)";
-          context.font = "30px Arial"
-            context.fillText(shapes[currentShape].label, points[0].x, points[0].y-30); 
+            $scope.label[currentShape].label = $('#label_txt').val();
+            context.fillStyle = "rgba(0,0,255,1)";
+            context.font = "30px Arial"
+            context.fillText($scope.label[currentShape].label, points[0].x, points[0].y-30); 
 
             newshape();
+            done_drawing = false;
+        }
+
+        if (load == true) {
+            context.fillStyle = 'rgba(0,0,0,.2)';
+            context.fill();
+            context.fillStyle = "rgba(0,0,255,1)";
+            context.font = "30px Arial"
+            context.fillText($scope.label[currentShape].label, points[0].x, points[0].y-30); 
         }
     }
 
     // Check if two points  are close to each other
     function nearby(p1, p2, amount) {
+      console.log(p1, p2)
         if ((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y) < amount * amount) {
             return true;
         } else {
@@ -196,8 +222,8 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
 
     // Add a new shape
     function newshape() {
-      shapes.push(new Shape());
-      currentShape = currentShape + 1;
+      console.log('Creating new shape')
+      $scope.label.push(new Shape());
     }
     prepare();
 });
