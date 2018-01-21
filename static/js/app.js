@@ -82,6 +82,17 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
         console.warn('could not get label', res.status, res.data)
     })
 
+    $scope.template = {'classes': ['Buoy', 'STC', 'Dock'] } // Test default
+    $http.get('/api/template' + $scope.dir).then(
+    function success(res) {
+        $scope.template = res.data
+        if ($scope.template['classes'] == undefined) $scope.template['classes'] = []
+        console.log($scope.template)
+    },
+    function error(res) {
+        console.warn('could not get template', res.status, res.data)
+    })
+
     $scope.save = function() {
         $http.post("/api/label" + $scope.img, $scope.label.slice(0,-1)).then(
         function success(res) {
