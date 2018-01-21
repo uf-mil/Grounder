@@ -32,7 +32,6 @@ app.config(function($routeProvider) {
 
 app.controller("imgCtrl", function($scope, $routeParams, $http) {
     function Label() {
-      this.name = "";
       this.class = "";
     }
 
@@ -224,11 +223,6 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
             points.splice(-1,1)
             context.fillStyle = 'rgba(0,0,0,.2)';
             context.fill();
-            text_label = $('#label_txt').val()
-            if (text_label != "")
-            {
-              $scope.label[currentShape].label.name = $('#label_txt').val();  
-            }
             context.fillStyle = "rgba(0,0,255,1)";
             context.font = "30px Arial"
 
@@ -256,14 +250,14 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
     }
 
     function getdisplaylabel(currentShape) {
-        display = "";
-        $.each($scope.label[currentShape].label, function(i,n){
-          if (n != "") {
-            display = n;
-            return false;
-          }
-        });
-        return display;
+        // display = "";
+        // $.each($scope.label[currentShape].label, function(i,n){
+        //   if (n != "") {
+        //     display = n;
+        //     return false;
+        //   }
+        // });
+        return $scope.label[currentShape].label.class;
     }
 
     // Check if two points  are close to each other
