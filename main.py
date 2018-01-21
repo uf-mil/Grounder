@@ -65,11 +65,24 @@ def api_data(my_path=''):
         f.save(writefile)
     return Response(status=200)
 
+@app.route('/api/next/<path:my_path>', methods=['GET'])
+def next(my_path=''):
+    if os.path.isdir(os.path.join('static/data', my_path)):
+        iteration = 0
+        for file in os.listdir(os.path.join('static/data', my_path)):
+            # Find the image and make sure it isn't already labelled
+            # print(os.path.join(os.path.splitext(file)[0], '.json'))
+            if file.endswith('.png') and (os.path.isfile(os.path.join(os.path.splitext(file)[0], '.json')) == False):
+                return os.path.splitext(file)[0]
+    return 'Ah, General Kenobi!'
+
 @app.route('/api/dir/', methods=['GET', 'POST'])
 @app.route('/api/dir/<path:my_path>', methods=['GET', 'POST'])
 def api_dir(my_path=''):
     if request.method == 'POST':
-        return 'General Kenobi!'
+        my_path = os.path.join('static/data/', my_path)
+        os.makedirs(my_path)
+        return 'Directory Created.'
         # do_edit_dir()
     else:
         my_path = os.path.join('static/data/', my_path)
