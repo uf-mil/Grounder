@@ -32,4 +32,4 @@ if __name__ == '__main__':
      if len(sys.argv) == 3:
         app.run(debug=True,host=sys.argv[1],port=int(sys.argv[2]))
      else:
-        print("Usage: demo.py <ip> <port>")   
+        app.run(debug=True,host='0.0.0.0',port=80)
