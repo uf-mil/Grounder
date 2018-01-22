@@ -121,9 +121,10 @@ app.controller("imgCtrl", function($scope, $routeParams, $http, $location) {
     var paint;
     var context;
     var done_drawing = false;
+    var current_label = {};
 
     $('#templates').change(function() {
-      $scope.label[$scope.label.length-1].label.class = $('#templates').find(":selected").text();
+      current_label = $('#templates').find(":selected").text();
     });
 
     function prepare() {
@@ -277,7 +278,7 @@ app.controller("imgCtrl", function($scope, $routeParams, $http, $location) {
         //     return false;
         //   }
         // });
-        return $scope.label[currentShape].label.class;
+        return current_label;
     }
 
     // Check if two points  are close to each other
