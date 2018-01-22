@@ -9,6 +9,8 @@ import shutil
 # To change the default port and host, modify the following variables: 
 PORT = 5000
 HOST = '0.0.0.0'
+UPLOAD_LIMIT = None
+CURRENT_UPLOAD_SIZE = 0
 
 app = Flask(__name__, static_url_path='/static')
 
@@ -16,6 +18,8 @@ if 'port' in os.environ:
     PORT = int(os.environ['port'])
 if 'host' in os.environ:
     HOST = os.environ['host']
+if 'upload_limit' in os.environ:
+    UPLOAD_LIMIT = int(os.environ['upload_limit'])
 
 @app.route('/')
 def index():
@@ -52,6 +56,11 @@ def api_upload(my_path=''):
         return Response(status=400, response='directory does not exsist')
     if len(request.files) != 1:
         return Response(status=400, response='1 file must be uploaded')
+    global CURRENT_UPLOAD_SIZE
+    global UPLOAD_LIMIT
+    if UPLOAD_LIMIT is not None and CURRENT_UPLOAD_SIZE >= UPLOAD_LIMIT:
+        print (CURRENT_UPLOAD_SIZE)
+        return Response(status=400, response='Reached upload limit')
     f = request.files.get(list(request.files.keys())[0])
     filename = f.filename
     filename = os.path.split(filename)[-1]
@@ -62,6 +71,8 @@ def api_upload(my_path=''):
     resolved = os.path.join('static/data', my_path, filename)
     with open(resolved, 'wb') as writefile:
         f.save(writefile)
+    if UPLOAD_LIMIT is not None:
+        CURRENT_UPLOAD_SIZE = CURRENT_UPLOAD_SIZE + 1
     return Response(status=200)
 
 @app.route('/api/next/', methods=['GET'])
@@ -83,8 +94,14 @@ def next(my_path=''):
 @app.route('/api/dir/<path:my_path>', methods=['GET', 'POST'])
 def api_dir(my_path=''):
     if request.method == 'POST':
+        global CURRENT_UPLOAD_SIZE
+        global UPLOAD_LIMIT
+        if UPLOAD_LIMIT is not None and CURRENT_UPLOAD_SIZE >= UPLOAD_LIMIT:
+            return Response(status=400, response='Reached upload limit')
         my_path = os.path.join('static/data/', my_path)
         os.makedirs(my_path)
+        if UPLOAD_LIMIT is not None:
+            CURRENT_UPLOAD_SIZE = CURRENT_UPLOAD_SIZE + 1
         return 'Directory Created.'
         # do_edit_dir()
     else:
