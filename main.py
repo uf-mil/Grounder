@@ -38,8 +38,14 @@ def img_open(my_path=None):
 @app.route('/api/label/<path:my_path>', methods=['GET', 'POST'])
 def api_label(my_path=None):
     if request.method == 'POST':
+        global CURRENT_UPLOAD_SIZE
+        global UPLOAD_LIMIT
+        if UPLOAD_LIMIT is not None and CURRENT_UPLOAD_SIZE >= UPLOAD_LIMIT:
+            return Response(status=400, response='Reached upload limit')
         with open(os.path.join('static/data/', (my_path + '.json')), "w+") as outfile:
             json.dump(request.get_json(), outfile, sort_keys=True, indent=4)
+        if UPLOAD_LIMIT is not None:
+            CURRENT_UPLOAD_SIZE = CURRENT_UPLOAD_SIZE + 1
         return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
     elif request.method == 'GET':
         file = os.path.join('static/data/', (my_path + '.json'))
@@ -131,8 +137,14 @@ def api_template(my_path=''):
         with open(os.path.join(my_path, 'template.json'), 'r') as f:
             return json.dumps(json.load(f)), 200, {'ContentType': 'application/json'}
     elif request.method == 'POST':
+        global CURRENT_UPLOAD_SIZE
+        global UPLOAD_LIMIT
+        if UPLOAD_LIMIT is not None and CURRENT_UPLOAD_SIZE >= UPLOAD_LIMIT:
+            return Response(status=400, response='Reached upload limit')
         with open(os.path.join('static/data/', my_path,  'template.json'), "w+") as outfile:
             json.dump(request.get_json(), outfile, sort_keys=True, indent=4)
+        if UPLOAD_LIMIT is not None:
+            CURRENT_UPLOAD_SIZE = CURRENT_UPLOAD_SIZE + 1
         return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
 
 
