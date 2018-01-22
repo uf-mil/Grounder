@@ -1,7 +1,9 @@
 <div>
-    <h3>Image {{img}}
+
+    <h3>
         <a ng-href="/#!/dir{{dir}}" type="button" class="btn btn-info">View Directory</a>
         <a ng-click="next()" type="button" class="btn btn-warning">Next Image</a>
+        Image {{img}}
     </h3>
     <div id="stage">
         <canvas id="canvas">
@@ -27,6 +29,7 @@
     top: 50%;
     padding: 1em;
     border: 1px solid #ced4da;
+    z-index: 3;
 }
 
 #stage {
