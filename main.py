@@ -59,7 +59,6 @@ def api_upload(my_path=''):
     global CURRENT_UPLOAD_SIZE
     global UPLOAD_LIMIT
     if UPLOAD_LIMIT is not None and CURRENT_UPLOAD_SIZE >= UPLOAD_LIMIT:
-        print (CURRENT_UPLOAD_SIZE)
         return Response(status=400, response='Reached upload limit')
     f = request.files.get(list(request.files.keys())[0])
     filename = f.filename
