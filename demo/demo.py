@@ -19,6 +19,9 @@ def button():
         if port > 5049:
             port = 5000
 
+        if[port-5000] ~= 0:
+            port[port-5000].stop()
+
         # Launch the docker container
         ports[port-5000] = client.containers.run("groundr", detach=True, command="./root/start.sh 0.0.0.0 " + str(port), ports={str(port) + '/tcp': str(port)})
         time.sleep(1.5)
