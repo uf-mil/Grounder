@@ -3,6 +3,7 @@ import os
 from glob import glob
 from flask import Flask, Response, request, render_template, redirect, url_for, send_from_directory, jsonify
 from werkzeug.utils import secure_filename
+from jsonschema import validate
 import json
 import shutil
 
@@ -43,7 +44,20 @@ def api_label(my_path=None):
         if UPLOAD_LIMIT is not None and CURRENT_UPLOAD_SIZE >= UPLOAD_LIMIT:
             return Response(status=400, response='Reached upload limit')
         with open(os.path.join('static/data/', (my_path + '.json')), "w+") as outfile:
-            json.dump(request.get_json(), outfile, sort_keys=True, indent=4)
+            data = request.get_json()
+            json.dump(data, outfile, sort_keys=True, indent=4)
+            # Find the template for this folder
+            template = open(os.path.join('static/data/',(my_path[:my_path.rindex('/')] + '/template.json')))
+            # Convert the template json to something validate can understand.
+            template = json.load(template)
+            # Call the validate function from jsonschema to verify the file we were suppsoed to create conforms with the template for the file.
+            validate(data, template)
+        new_json = open(os.path.join('static/data/', (my_path + '.json')))
+        new_json = json.load(new_json)
+        # print(new_json)
+        # Call the validate function from jsonscheme to now ensure the json created contains the data desired.
+        if new_json != data:
+        	return Response(status=400, response='Generated json does not match the data submitted for export.')
         if UPLOAD_LIMIT is not None:
             CURRENT_UPLOAD_SIZE = CURRENT_UPLOAD_SIZE + 1
         return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
@@ -59,7 +73,7 @@ def api_label(my_path=None):
 def api_upload(my_path=''):
     path = os.path.join('static/data', my_path)
     if not os.path.isdir(path):
-        return Response(status=400, response='directory does not exsist')
+        return Response(status=400, response='directory does not exist')
     if len(request.files) != 1:
         return Response(status=400, response='1 file must be uploaded')
     global CURRENT_UPLOAD_SIZE
@@ -116,7 +130,7 @@ def api_dir(my_path=''):
                 my_path) if os.path.isdir(os.path.join(my_path, name))]
             child_imgs = [os.path.splitext(name)[0] for name in os.listdir(
                 my_path) if os.path.isfile(os.path.join(my_path, name)) and name.endswith('.png')]
-            print(my_path)
+            # print(my_path)
             dicti = {'children': child_dirs, 'images': child_imgs}
             return jsonify(dicti)
         else:
@@ -130,7 +144,7 @@ def api_template(my_path=''):
         my_path = os.path.join('static/data/', my_path)
         while not os.path.isfile(os.path.join(my_path, 'template.json')):
             my_path = os.path.normpath(os.path.join(my_path, '../'))
-            print(my_path)
+            # print(my_path)
             iterations = iterations + 1
             if my_path== 'static' or iterations == 500:
                 return Response(status=404, response='Unable to find parent template')
@@ -142,7 +156,15 @@ def api_template(my_path=''):
         if UPLOAD_LIMIT is not None and CURRENT_UPLOAD_SIZE >= UPLOAD_LIMIT:
             return Response(status=400, response='Reached upload limit')
         with open(os.path.join('static/data/', my_path,  'template.json'), "w+") as outfile:
+            data = request.get_json()
             json.dump(request.get_json(), outfile, sort_keys=True, indent=4)
+        # Open template file to make sure what we just created matches what was submitted.
+        template = open(os.path.join('static/data/',(my_path + 'template.json')))
+        # Convert the template json to something validate can understand.
+        template = json.load(template)
+        # Call the validate function from jsonschema to verify our output json conforms with the template we were supposed to create
+        validate(data, template)
+
         if UPLOAD_LIMIT is not None:
             CURRENT_UPLOAD_SIZE = CURRENT_UPLOAD_SIZE + 1
         return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
