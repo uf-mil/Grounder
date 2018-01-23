@@ -8,18 +8,21 @@ import docker
 client = docker.from_env()
 
 app = Flask(__name__)
-ports = [0] * 1000
+ports = [0] * 50
+port = 4999
 
 @app.route('/', methods=["GET", "POST"])
 def button():
     if request.method == "POST":
-    	port = 5000
+        # Next used 
+        port += 1
+        if port > 5049:
+            port = 5000
 
-    	#Search for an unused port
-    	for i in range(5000,6000):
-    		if ports[i-5000] == 0:
-    			port = i
-    			break
+        # Cleanup old docker images
+        if[port-5000] ~= 0:
+            port[port-5000].stop()
+            port[port-5000].remove()
 
         # Launch the docker container
         ports[port-5000] = client.containers.run("groundr", detach=True, command="./root/start.sh 0.0.0.0 " + str(port), ports={str(port) + '/tcp': str(port)})
