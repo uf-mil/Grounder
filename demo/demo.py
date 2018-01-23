@@ -20,7 +20,7 @@ def button():
             port = 5000
 
         # Cleanup old docker images
-        if[port-5000] ~= 0:
+        if[port-5000] != 0:
             port[port-5000].stop()
             port[port-5000].remove()
 
