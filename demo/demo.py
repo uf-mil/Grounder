@@ -8,7 +8,7 @@ import docker
 client = docker.from_env()
 
 app = Flask(__name__)
-ports = [0] * 1000
+ports = [0] * 50
 
 @app.route('/', methods=["GET", "POST"])
 def button():
@@ -16,7 +16,7 @@ def button():
     	port = 5000
 
     	#Search for an unused port
-    	for i in range(5000,6000):
+    	for i in range(5000,5049):
     		if ports[i-5000] == 0:
     			port = i
     			break
