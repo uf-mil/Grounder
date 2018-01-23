@@ -19,8 +19,10 @@ def button():
         if port > 5049:
             port = 5000
 
+        # Cleanup old docker images
         if[port-5000] ~= 0:
             port[port-5000].stop()
+            port[port-5000].remove()
 
         # Launch the docker container
         ports[port-5000] = client.containers.run("groundr", detach=True, command="./root/start.sh 0.0.0.0 " + str(port), ports={str(port) + '/tcp': str(port)})
