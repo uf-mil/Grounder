@@ -22,36 +22,40 @@ and submit labels with fewer than three. These are rejected but there is no indi
 EXPORT_SCHEMA = {
     "$schema": "http://json-schema.org/draft-06/schema#",
     "title": "Export Schema",
-    "type": "object",
-    "properties": {
-        "label":
-        {
-            "description" : "Contains the class for our label.",
-            "type": "object",
-            "properties":
-            {
-                "class": {"type" : "string"}
-            },
-            "required":["class"]
-        },
-        "points" :
-        {    
-            "description": "Contains the points that make up the label.",
-            "type": "array",
-            "items":
-            {
-            	"type":"object",
-            	"properties":{
-                	"x":{"type":"number"},
-                	"y":{"type":"number"}
-            	},
-            	"required":["x","y"]
-            },
-            "minItems": 3
-            
-        },
-    },
-    "required": ["label", "points"]
+    "type": "array",
+    "items": {
+    	"type":"object",
+    	"properties":{
+	        "label":
+	        {
+	            "description" : "Contains the class for our label.",
+	            "type": "object",
+	            "properties":
+	            {
+	                "class": {"type" : "string"}
+	            },
+	            "required":["class"]
+	        },
+	        "points" :
+	        {    
+	            "description": "Contains the points that make up the label.",
+	            "type": "array",
+	            "items":
+	            {
+	            	"type":"object",
+	            	"properties":{
+	                	"x":{"type":"number"},
+	                	"y":{"type":"number"}
+	            	},
+	            	"required":["x","y"]
+	            },
+	            "minItems": 3
+	            
+	        },
+	    },
+	    "required": ["label", "points"]
+	},
+	"minItems":1
 }
 # Another schema, this one checks those trying to upload a template. Here we ensure there is at least one class present for labeling. 
 TEMPLATE_SCHEMA = {
@@ -103,19 +107,27 @@ def api_label(my_path=None):
         global UPLOAD_LIMIT
         if UPLOAD_LIMIT is not None and CURRENT_UPLOAD_SIZE >= UPLOAD_LIMIT:
             return Response(status=400, response='Reached upload limit')
+        check = os.path.isfile(os.path.join('static/data/', (my_path + '.png')))
+        if check == False:
+            return Response(status=400, response='Image does not exist.')
         with open(os.path.join('static/data/', (my_path + '.json')), "w+") as outfile:
             data = request.get_json()
             json.dump(data, outfile, sort_keys=True, indent=4)
             # Find the template for this folder
-            template = open(os.path.join('static/data/',(my_path[:my_path.rindex('/')] + '/template.json')))
+            template = fetch_template(os.path.join('static/data/',(my_path[:my_path.rindex('/')] + '/template.json')))
+            if template == None:
+                return Response(status=400, response='Unable to find template.')
+            # Open the template
+            template = open(os.path.join(template, 'template.json'), 'r')
             # Convert the template json to something validate can understand.
             template = json.load(template)
            # Call the validate function from jsonschema to verify the file we were suppsoed to create conforms with the template for the file.
         new_json = open(os.path.join('static/data/', (my_path + '.json')))
         new_json = json.load(new_json)
+        # print(new_json[-1])
         # Generally speaking most errors will be caught at this stage of the game, where if it does not match our schema, it will send a validation error.
         try:
-            validate(new_json[0], EXPORT_SCHEMA)
+            validate(new_json, EXPORT_SCHEMA)
             # print(v)
         except:
             return Response(status=400, response='Json does not match the required format, requires 3 points minimum and 1 label.')
@@ -218,14 +230,10 @@ def api_dir(my_path=''):
 @app.route('/api/template/<path:my_path>', methods=['GET', 'POST'])
 def api_template(my_path=''):
     if request.method == 'GET':
-        iterations = 0
         my_path = os.path.join('static/data/', my_path)
-        while not os.path.isfile(os.path.join(my_path, 'template.json')):
-            my_path = os.path.normpath(os.path.join(my_path, '../'))
-            # print(my_path)
-            iterations = iterations + 1
-            if my_path== 'static' or iterations == 500:
-                return Response(status=404, response='Unable to find parent template')
+        my_path = fetch_template(my_path)
+        if my_path == None:
+            return Response(status=400, response='Unable to find template.')
         with open(os.path.join(my_path, 'template.json'), 'r') as f:
             return json.dumps(json.load(f)), 200, {'ContentType': 'application/json'}
     elif request.method == 'POST':
@@ -253,7 +261,15 @@ def api_template(my_path=''):
             CURRENT_UPLOAD_SIZE = CURRENT_UPLOAD_SIZE + 1
         return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
 
-
+def fetch_template(my_path):
+    iterations = 0
+    while not os.path.isfile(os.path.join(my_path, 'template.json')):
+            my_path = os.path.normpath(os.path.join(my_path, '../'))
+            # print(my_path)
+            iterations = iterations + 1
+            if my_path== 'static' or iterations == 500:
+                return None
+    return my_path
 
 if __name__ == '__main__':
     app.run(debug=True, host=HOST, port=PORT)
