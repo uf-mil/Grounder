@@ -247,7 +247,8 @@ app.controller("imgCtrl", function($scope, $routeParams, $http, $location) {
             context.font = "30px Arial"
 
             context.fillText(getdisplaylabel(currentShape), points[0].x, points[0].y-30); 
-
+            $scope.label[currentShape].label.class = getdisplaylabel()
+            // console.log($scope.label[currentShape].label.class)
             $scope.old_label = $scope.label.slice()
             newshape();
             done_drawing = false;
@@ -278,6 +279,7 @@ app.controller("imgCtrl", function($scope, $routeParams, $http, $location) {
         //     return false;
         //   }
         // });
+        console.log(current_label)
         return current_label;
     }
 

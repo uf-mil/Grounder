@@ -12,6 +12,66 @@ PORT = 5000
 HOST = '0.0.0.0'
 UPLOAD_LIMIT = None
 CURRENT_UPLOAD_SIZE = 0
+'''
+The following template is the standard format we export as json files. Each json file must have at least one label.
+The label is a json object that contains a class which is what the label is classified as. 
+The class comes from the template file set up by the user and exported in json format. Inside is a list of acceptable classes. 
+Each label requires a minimum of three points in order to form a shape. This may cause some errors as our current labeler allows for users to try 
+and submit labels with fewer than three. These are rejected but there is no indication that such a rejection occurred. 
+'''
+EXPORT_SCHEMA = {
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "title": "Export Schema",
+    "type": "object",
+    "properties": {
+        "label":
+        {
+            "description" : "Contains the class for our label.",
+            "type": "object",
+            "properties":
+            {
+                "class": {"type" : "string"}
+            },
+            "required":["class"]
+        },
+        "points" :
+        {    
+            "description": "Contains the points that make up the label.",
+            "type": "array",
+            "items":
+            {
+            	"type":"object",
+            	"properties":{
+                	"x":{"type":"number"},
+                	"y":{"type":"number"}
+            	},
+            	"required":["x","y"]
+            },
+            "minItems": 3
+            
+        },
+    },
+    "required": ["label", "points"]
+}
+# Another schema, this one checks those trying to upload a template. Here we ensure there is at least one class present for labeling. 
+TEMPLATE_SCHEMA = {
+	    "$schema": "http://json-schema.org/draft-06/schema#",
+    "title": "Template Schema",
+    "type": "object",
+    "properties": {
+        "classes":
+        {
+            "description" : "Contains all possible classes for label.",
+            "type": "array",
+            "items":
+            {
+            	"type":"string"
+            },
+            "minItems":1
+        }
+    },
+    "required": ["classes"]
+}
 
 app = Flask(__name__, static_url_path='/static')
 
@@ -50,14 +110,32 @@ def api_label(my_path=None):
             template = open(os.path.join('static/data/',(my_path[:my_path.rindex('/')] + '/template.json')))
             # Convert the template json to something validate can understand.
             template = json.load(template)
-            # Call the validate function from jsonschema to verify the file we were suppsoed to create conforms with the template for the file.
-            validate(data, template)
+           # Call the validate function from jsonschema to verify the file we were suppsoed to create conforms with the template for the file.
         new_json = open(os.path.join('static/data/', (my_path + '.json')))
         new_json = json.load(new_json)
+        # Generally speaking most errors will be caught at this stage of the game, where if it does not match our schema, it will send a validation error.
+        try:
+            validate(new_json[0], EXPORT_SCHEMA)
+            # print(v)
+        except:
+            return Response(status=400, response='Json does not match the required format, requires 3 points minimum and 1 label.')
+        # There is a chance that the user will manually input a bad json through the network menu. This will catch it. 
+        try:
+            dict_json = new_json[0]
+        except KeyError:
+            return Response(status=400, response='Desired key not found, is this a valid json label?')
+        # Should it somehow pass all of the above there is still a chance the submitted json has incorrect labels applied to it. An except here catches this.
+        try:
+            if dict_json['label']['class'] not in template['classes']:
+                # print(dict_json['label']['class'])
+                return Response(status=400, response='Selected class not available in template.')
+        except:
+        	# If classes is not found in template then we error out. So this is an exra layer of security that shouldn't be necessary.
+            return Response(status=400, response='Unable to find keyword: classes')
         # print(new_json)
         # Call the validate function from jsonscheme to now ensure the json created contains the data desired.
         if new_json != data:
-        	return Response(status=400, response='Generated json does not match the data submitted for export.')
+            return Response(status=400, response='Generated json does not match the data submitted for export.')
         if UPLOAD_LIMIT is not None:
             CURRENT_UPLOAD_SIZE = CURRENT_UPLOAD_SIZE + 1
         return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
@@ -163,7 +241,10 @@ def api_template(my_path=''):
         # Convert the template json to something validate can understand.
         template = json.load(template)
         # Call the validate function from jsonschema to verify our output json conforms with the template we were supposed to create
-        validate(data, template)
+        try:
+            validate(template, TEMPLATE_SCHEMA)
+        except:
+            return Response(status=400, response='Invalid template, requires at least 1 label and proper formatting. Refer to schema.')
 
         if UPLOAD_LIMIT is not None:
             CURRENT_UPLOAD_SIZE = CURRENT_UPLOAD_SIZE + 1
