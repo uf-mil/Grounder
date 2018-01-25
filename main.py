@@ -235,16 +235,19 @@ def api_template(my_path=''):
             return Response(status=400, response='Reached upload limit')
         with open(os.path.join('static/data/', my_path,  'template.json'), "w+") as outfile:
             data = request.get_json()
-            json.dump(request.get_json(), outfile, sort_keys=True, indent=4)
-        # Open template file to make sure what we just created matches what was submitted.
-        template = open(os.path.join('static/data/',(my_path + 'template.json')))
-        # Convert the template json to something validate can understand.
-        template = json.load(template)
         # Call the validate function from jsonschema to verify our output json conforms with the template we were supposed to create
+            try:
+                validate(data, TEMPLATE_SCHEMA)
+            except:
+                return Response(status=400, response='Invalid template, requires at least 1 label and proper formatting. Refer to schema.')
+            json.dump(request.get_json(), outfile, sort_keys=True, indent=4)
+        # Open template file to make sure what we just created matches what was submitted. In theory we should never get an except here considering we JUST wrote the file. 
         try:
-            validate(template, TEMPLATE_SCHEMA)
+            template = open(os.path.join('static/data/',(my_path + 'template.json')))
+            # Convert the template json to something validate can understand.
+            template = json.load(template)
         except:
-            return Response(status=400, response='Invalid template, requires at least 1 label and proper formatting. Refer to schema.')
+            return Response(status=400, response='Unable to find template.')
 
         if UPLOAD_LIMIT is not None:
             CURRENT_UPLOAD_SIZE = CURRENT_UPLOAD_SIZE + 1
