@@ -112,7 +112,12 @@ def api_label(my_path=None):
             return Response(status=400, response='Image does not exist.')
         with open(os.path.join('static/data/', (my_path + '.json')), "w+") as outfile:
             data = request.get_json()
-            json.dump(data, outfile, sort_keys=True, indent=4)
+            print(data)
+            try:
+                validate(data, EXPORT_SCHEMA)
+            # print(v)
+            except:
+                return Response(status=400, response='Json does not match the required format, requires 3 points minimum and 1 label.')
             # Find the template for this folder
             template = fetch_template(os.path.join('static/data/',(my_path[:my_path.rindex('/')] + '/template.json')))
             if template == None:
@@ -121,33 +126,15 @@ def api_label(my_path=None):
             template = open(os.path.join(template, 'template.json'), 'r')
             # Convert the template json to something validate can understand.
             template = json.load(template)
-           # Call the validate function from jsonschema to verify the file we were suppsoed to create conforms with the template for the file.
-        new_json = open(os.path.join('static/data/', (my_path + '.json')))
-        new_json = json.load(new_json)
-        # print(new_json[-1])
-        # Generally speaking most errors will be caught at this stage of the game, where if it does not match our schema, it will send a validation error.
-        try:
-            validate(new_json, EXPORT_SCHEMA)
-            # print(v)
-        except:
-            return Response(status=400, response='Json does not match the required format, requires 3 points minimum and 1 label.')
-        # There is a chance that the user will manually input a bad json through the network menu. This will catch it. 
-        try:
-            dict_json = new_json[0]
-        except KeyError:
-            return Response(status=400, response='Desired key not found, is this a valid json label?')
-        # Should it somehow pass all of the above there is still a chance the submitted json has incorrect labels applied to it. An except here catches this.
-        try:
-            if dict_json['label']['class'] not in template['classes']:
-                # print(dict_json['label']['class'])
-                return Response(status=400, response='Selected class not available in template.')
-        except:
-        	# If classes is not found in template then we error out. So this is an exra layer of security that shouldn't be necessary.
-            return Response(status=400, response='Unable to find keyword: classes')
-        # print(new_json)
-        # Call the validate function from jsonscheme to now ensure the json created contains the data desired.
-        if new_json != data:
-            return Response(status=400, response='Generated json does not match the data submitted for export.')
+            for dict_json in data:
+                try:
+                    if dict_json['label']['class'] not in template['classes']:
+                        # print(dict_json['label']['class'])
+                        return Response(status=400, response='Selected class not available in template.')
+                except:
+                    # If classes is not found in template then we error out. So this is an exra layer of security that shouldn't be necessary.
+                    return Response(status=400, response='Unable to find keyword: classes')
+            json.dump(data, outfile, sort_keys=True, indent=4)
         if UPLOAD_LIMIT is not None:
             CURRENT_UPLOAD_SIZE = CURRENT_UPLOAD_SIZE + 1
         return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
@@ -249,14 +236,6 @@ def api_template(my_path=''):
             except:
                 return Response(status=400, response='Invalid template, requires at least 1 label and proper formatting. Refer to schema.')
             json.dump(request.get_json(), outfile, sort_keys=True, indent=4)
-        # Open template file to make sure what we just created matches what was submitted. In theory we should never get an except here considering we JUST wrote the file. 
-        try:
-            template = open(os.path.join('static/data/',(my_path + 'template.json')))
-            # Convert the template json to something validate can understand.
-            template = json.load(template)
-        except:
-            return Response(status=400, response='Unable to find template.')
-
         if UPLOAD_LIMIT is not None:
             CURRENT_UPLOAD_SIZE = CURRENT_UPLOAD_SIZE + 1
         return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
