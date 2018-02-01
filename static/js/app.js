@@ -149,7 +149,6 @@ app.controller("imgCtrl", function($scope, $routeParams, $http, $location) {
           function success(res) {
               $scope.old_label = res.data
               $scope.label = $scope.old_label
-              console.log("Trying to load label: ", $scope.label)
               for (var i = 0; i < $scope.label.length; i++) {
                 redraw(true, i);
               }
@@ -251,7 +250,7 @@ app.controller("imgCtrl", function($scope, $routeParams, $http, $location) {
 
             context.fillText(getdisplaylabel(currentShape), points[0].x, points[0].y-30); 
             $scope.label[currentShape].label.class = getdisplaylabel()
-            // console.log($scope.label[currentShape].label.class)
+
             $scope.old_label = $scope.label.slice()
             newshape();
             done_drawing = false;
@@ -263,8 +262,7 @@ app.controller("imgCtrl", function($scope, $routeParams, $http, $location) {
             context.fill();
             context.fillStyle = "rgba(0,0,255,1)";
             context.font = "30px Arial"
-            context.fillText(labels, points[0].x, points[0].y-30);
-            console.log("trying to display current label: ", labels) 
+            context.fillText(labels, points[0].x, points[0].y-30); 
         }
     }
 
@@ -283,7 +281,6 @@ app.controller("imgCtrl", function($scope, $routeParams, $http, $location) {
         //     return false;
         //   }
         // });
-        // console.log($scope.label[currentShape].label.class)
         return current_label;
     }
 
