@@ -149,6 +149,7 @@ app.controller("imgCtrl", function($scope, $routeParams, $http, $location) {
           function success(res) {
               $scope.old_label = res.data
               $scope.label = $scope.old_label
+              console.log("Trying to load label: ", $scope.label)
               for (var i = 0; i < $scope.label.length; i++) {
                 redraw(true, i);
               }
@@ -203,9 +204,11 @@ app.controller("imgCtrl", function($scope, $routeParams, $http, $location) {
     function redraw(load, currentShape) {
       // console.log($scope.label)
       var points = $scope.label[currentShape].points;
+
       if (load == true)
       {
             points.push(points[0]);
+            var labels = $scope.label[currentShape].label.class;
       }
 
       // Check if we are closing the contour
@@ -260,7 +263,8 @@ app.controller("imgCtrl", function($scope, $routeParams, $http, $location) {
             context.fill();
             context.fillStyle = "rgba(0,0,255,1)";
             context.font = "30px Arial"
-            context.fillText(getdisplaylabel(currentShape), points[0].x, points[0].y-30); 
+            context.fillText(labels, points[0].x, points[0].y-30);
+            console.log("trying to display current label: ", labels) 
         }
     }
 
@@ -279,7 +283,7 @@ app.controller("imgCtrl", function($scope, $routeParams, $http, $location) {
         //     return false;
         //   }
         // });
-        console.log(current_label)
+        // console.log($scope.label[currentShape].label.class)
         return current_label;
     }
 
@@ -319,7 +323,7 @@ app.controller("dirCtrl", function($scope, $routeParams, $http) {
     // Just defaults for testing until API works
     $scope.children = []
     $scope.images = []
-
+    // Load directories
     $http.get("/api/dir" + $scope.dir).then(
     function success(res) {
         if (typeof(res.data) != "object") {
